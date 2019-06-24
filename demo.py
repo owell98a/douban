@@ -1,6 +1,7 @@
 from urllib import request
 from bs4 import BeautifulSoup
-
+import os
+import csv
 
 url='https://movie.douban.com/top250'
 
@@ -31,7 +32,39 @@ def get_movie(url):
         f_url.append(film_url)
     return f_url
 
-print (get_movie(url))
+#电影主界面解析,最终按照grep=['电影','导演','编剧','主演','类型','语言','上映日期','片长','又名'] 获取字段数据
+def movie_data(url):
+    content=get_html(url)
+    fname=content.find('div',id='content')
+    fname=fname.find('span',property="v:itemreviewed")
+    fname=fname.text
+    fdata=content.find('div',id='info').text
+    fdata=fdata.split('\n')
+    tmp=[i.strip() for i in fdata if len(i)]
+    tmp_dict={'电影':fname}
+    #print (tmp)
+    for i in tmp:
+        i=i.split(':',1)
+        if len(i)>=2:
+            tmp_dict[i[0]]=i[1]
+        #tmp_dict.append(i)
+
+    grep=['电影','导演','编剧','主演','类型','语言','上映日期','片长','又名']
+    fin_data=[tmp_dict[i] for i in grep]
+    return fin_data
+
+def save_data(test):
+    with open('./test.csv','w') as f:
+        fcsv=csv.writer(f)
+        fcsv.writerow(test)
+
+
+
+print (movie_data('https://movie.douban.com/subject/1292052/'))
+t=movie_data('https://movie.douban.com/subject/1292052/')
+save_data(t)
+
+
 
 
 
